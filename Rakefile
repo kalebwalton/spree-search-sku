@@ -2,7 +2,10 @@ require 'rubygems'
 require 'rake'
 require 'rake/testtask'
 require 'rake/packagetask'
-require 'rake/gempackagetask'
+require 'rubygems/package_task'
+#require 'rake/gempackagetask'  #Deprecated
+require 'rails'
+require 'rspec-rails'
 
 gemfile = File.expand_path('../spec/test_app/Gemfile', __FILE__)
 if File.exists?(gemfile) && (%w(spec cucumber).include?(ARGV.first.to_s) || ARGV.size == 0)
@@ -14,10 +17,10 @@ if File.exists?(gemfile) && (%w(spec cucumber).include?(ARGV.first.to_s) || ARGV
   require 'rspec/core/rake_task'
   RSpec::Core::RakeTask.new
 
-  require 'cucumber/rake/task'
-  Cucumber::Rake::Task.new do |t|
-    t.cucumber_opts = %w{--format progress}
-  end
+  #require 'cucumber/rake/task'
+  #Cucumber::Rake::Task.new do |t|
+  #  t.cucumber_opts = %w{--format progress}
+  #end
 end
 
 desc "Default Task"
@@ -25,7 +28,7 @@ task :default => [:spec, :cucumber ]
 
 spec = eval(File.read('spree_search_sku.gemspec'))
 
-Rake::GemPackageTask.new(spec) do |p|
+Gem::PackageTask.new(spec) do |p|
   p.gem_spec = spec
 end
 
@@ -41,7 +44,11 @@ task :default => [ :spec ]
 
 desc "Regenerates a rails 3 app for testing"
 task :test_app do
-  require '../spree/lib/generators/spree/test_app_generator'
+  SPREE_PATH = ENV['SPREE_PATH']
+  SPREE_CORE_PATH = ENV['SPREE_CORE_PATH']
+  raise "SPREE_PATH should be specified (where is your source code for spree?)" unless SPREE_PATH
+
+  require File.join(SPREE_PATH, 'lib/generators/spree/test_app_generator')
   class SpreeSearchSkuTestAppGenerator < Spree::Generators::TestAppGenerator
 
     def install_gems
@@ -58,7 +65,7 @@ task :test_app do
     protected
     def full_path_for_local_gems
       <<-gems
-gem 'spree_core', :path => \'#{File.join(File.dirname(__FILE__), "../spree/", "core")}\'
+gem 'spree_core', :path => \'#{SPREE_CORE_PATH}\'
 gem 'spree_search_sku', :path => \'#{File.dirname(__FILE__)}\'
       gems
     end

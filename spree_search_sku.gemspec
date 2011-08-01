@@ -10,9 +10,8 @@ Gem::Specification.new do |s|
   # s.email             = 'david@loudthinking.com'
   # s.homepage          = 'http://www.rubyonrails.org'
   # s.rubyforge_project = 'actionmailer'
-
   s.files         = `git ls-files`.split("\n")
-  s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
+  s.test_files    = Dir.glob("{test,spec,features}/**/*")
   s.require_path = 'lib'
   s.requirements << 'none'
 
